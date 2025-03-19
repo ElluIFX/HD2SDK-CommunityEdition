@@ -574,7 +574,7 @@ def GetMeshData(og_object):
     if mesh.vertex_colors:
         color_layer = mesh.vertex_colors.active
         for face in object.data.polygons:
-            if color_layer == None:
+            if color_layer is None:
                 PrettyPrint(f"{og_object.name} Color Layer does not exist", "ERROR")
                 break
             for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
@@ -1272,7 +1272,7 @@ class TocEntry:
             callback = LoadStingrayCompositeMesh
         if self.TypeID == Hash64("bones"):
             callback = LoadStingrayBones
-        if callback == None:
+        if callback is None:
             callback = LoadStingrayDump
 
         if callback is not None:
@@ -1284,7 +1284,7 @@ class TocEntry:
                 Reload,
                 MakeBlendObject,
             )
-            if self.LoadedData == None:
+            if self.LoadedData is None:
                 raise Exception("Archive Entry Load Failed")
             self.IsLoaded = True
             if self.TypeID == MeshID and not self.IsModified:
@@ -1323,7 +1323,7 @@ class TocEntry:
             callback = SaveStingrayTexture
         if self.TypeID == MaterialID:
             callback = SaveStingrayMaterial
-        if callback == None:
+        if callback is None:
             callback = SaveStingrayDump
 
         if self.IsLoaded:
@@ -1450,7 +1450,7 @@ class StreamToc:
         self.GpuFile = MemoryStream(IOMode="write")
         self.StreamFile = MemoryStream(IOMode="write")
         self.Serialize()
-        if path == None:
+        if path is None:
             path = self.Path
 
         with open(path, "w+b") as f:
@@ -1662,7 +1662,7 @@ class TocManager:
     def Save(self, FileID, TypeID):
         # ApplyAllTransforms(self, FileID)
         Entry = self.GetEntry(FileID, TypeID)
-        if Entry == None:
+        if Entry is None:
             PrettyPrint(f"Failed to save entry {FileID}")
             return False
         if not Global_TocManager.IsInPatch(Entry):
@@ -1671,14 +1671,14 @@ class TocManager:
         return True
 
     def CopyPaste(self, Entry, GenID=False, NewID=None):
-        if self.ActivePatch == None:
+        if self.ActivePatch is None:
             raise Exception("No patch exists, please create one first")
         if self.ActivePatch:
             dup = deepcopy(Entry)
             dup.IsCreated = True
-            # if self.ActivePatch.GetEntry(dup.FileID, dup.TypeID) is not None and NewID == None:
+            # if self.ActivePatch.GetEntry(dup.FileID, dup.TypeID) is not None and NewID is None:
             #     GenID = True
-            if GenID and NewID == None:
+            if GenID and NewID is None:
                 dup.FileID = RandomHash16()
             if NewID is not None:
                 dup.FileID = NewID
@@ -1692,7 +1692,7 @@ class TocManager:
                 self.CopyBuffer.append(Entry)
 
     def Paste(self, GenID=False, NewID=None):
-        if self.ActivePatch == None:
+        if self.ActivePatch is None:
             raise Exception("No patch exists, please create one first")
         if self.ActivePatch:
             for ToCopy in self.CopyBuffer:
@@ -1708,7 +1708,7 @@ class TocManager:
         self.ActivePatch.ToFile()
 
     def CreatePatchFromActive(self, name="New Patch"):
-        if self.ActiveArchive == None:
+        if self.ActiveArchive is None:
             raise Exception(
                 "No Archive exists to create patch from, please open one first"
             )
@@ -1737,12 +1737,12 @@ class TocManager:
                 self.SetActivePatch(Patch)
 
     def AddNewEntryToPatch(self, Entry):
-        if self.ActivePatch == None:
+        if self.ActivePatch is None:
             raise Exception("No patch exists, please create one first")
         self.ActivePatch.AddEntry(Entry)
 
     def AddEntryToPatch(self, FileID, TypeID):
-        if self.ActivePatch == None:
+        if self.ActivePatch is None:
             raise Exception("No patch exists, please create one first")
 
         Entry = self.GetEntry(FileID, TypeID)
@@ -1950,7 +1950,7 @@ def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
     # bsdf = mat.node_tree.nodes["Principled BSDF"] # It's not even used?
 
     Entry = Global_TocManager.GetEntry(int(ID), MaterialID)
-    if Entry == None:
+    if Entry is None:
         PrettyPrint(f"No Entry Found when getting Material ID: {ID}", "ERROR")
         return
     if Entry.MaterialTemplate is not None:
@@ -2199,7 +2199,7 @@ def GenerateMaterialTextures(Entry):
         if mat.name == str(Entry.FileID):
             material = mat
             break
-    if material == None:
+    if material is None:
         raise Exception(
             f"Material Could not be Found ID: {Entry.FileID} {bpy.data.materials}"
         )
@@ -2208,7 +2208,7 @@ def GenerateMaterialTextures(Entry):
         if node.type == "GROUP":
             group = node
             break
-    if group == None:
+    if group is None:
         raise Exception("Could not find node group within material")
     filepaths = []
     for input_socket in group.inputs:
@@ -3670,7 +3670,7 @@ class StingrayMeshFile:
             for mesh in self.RawMeshes:
                 mesh_info = self.MeshInfoArray[self.DEV_MeshInfoMap[mesh.MeshInfoIndex]]
                 if mesh not in VertOrderedMeshes_flat:
-                    if smallest_vert_mesh == None:
+                    if smallest_vert_mesh is None:
                         smallest_vert_mesh = mesh
                     else:
                         smallest_mesh_info = self.MeshInfoArray[
@@ -3683,7 +3683,7 @@ class StingrayMeshFile:
                             smallest_vert_mesh = mesh
 
                 if mesh not in IndexOrderedMeshes_flat:
-                    if smallest_index_mesh == None:
+                    if smallest_index_mesh is None:
                         smallest_index_mesh = mesh
                     else:
                         smallest_mesh_info = self.MeshInfoArray[
@@ -3942,7 +3942,7 @@ def IncorrectVertexGroupNaming(self):
             self.report({"ERROR"}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
         groups = GetVertexGroupsFromID(ID, InfoIndex)
-        if groups == None or len(groups) == 0:
+        if groups is None or len(groups) == 0:
             self.report(
                 {"WARNING"}, "No Prior Loaded Vertex Groups Found, This May be Correct"
             )
@@ -4008,7 +4008,7 @@ def AllTransformsApplied(self):
             PrettyPrint(f"Found Correct Transforms for Object: {obj.name}")
             return False
         else:
-            if transforms == None:
+            if transforms is None:
                 PrettyPrint(
                     f"Failed to find any Cashed Transforms for Object: {obj.name} ID: {ID}",
                     "WARN",
@@ -4430,7 +4430,7 @@ class RenamePatchOperator(Operator):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        if Global_TocManager.ActiveArchive == None:
+        if Global_TocManager.ActiveArchive is None:
             self.report({"ERROR"}, "No patch exists, please create one first")
             return {"CANCELLED"}
         return context.window_manager.invoke_props_dialog(self)
@@ -4717,7 +4717,7 @@ class DuplicateEntryOperator(Operator):
 
     def execute(self, context):
         global Global_randomID
-        if Global_TocManager.ActivePatch == None:
+        if Global_TocManager.ActivePatch is None:
             Global_randomID = ""
             self.report({"ERROR"}, "No Patches Currently Loaded")
             return {"CANCELLED"}
@@ -4765,7 +4765,7 @@ class RenamePatchEntryOperator(Operator):
         Entry = Global_TocManager.GetPatchEntry_B(
             int(self.object_id), int(self.object_typeid)
         )
-        if Entry == None:
+        if Entry is None:
             raise Exception(
                 "Entry does not exist in patch (cannot rename non patch entries)"
             )
@@ -4819,7 +4819,7 @@ class ImportDumpOperator(Operator, ImportHelper):
     object_typeid: StringProperty(options={"HIDDEN"})
 
     def execute(self, context):
-        if Global_TocManager.ActivePatch == None:
+        if Global_TocManager.ActivePatch is None:
             raise Exception("No patch exists, please create one first")
 
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
@@ -5443,7 +5443,7 @@ def CreateModdedMaterial(template, ID=None):
         raise Exception(f"Selected material template: {template} does not exist")
 
     Entry = TocEntry()
-    if ID == None:
+    if ID is None:
         Entry.FileID = RandomHash16()
         PrettyPrint(f"File ID is now: {Entry.FileID}")
     else:
@@ -6199,7 +6199,7 @@ class HellDivers2ToolsPanel(Panel):
         global Global_addonUpToDate
         global Global_latestAddonVersion
 
-        if Global_addonUpToDate == None:
+        if Global_addonUpToDate is None:
             row.label(text="Addon Failed to Check latest Version")
         elif not Global_addonUpToDate:
             row.label(text="Addon is Outdated!")
@@ -6442,7 +6442,7 @@ class HellDivers2ToolsPanel(Panel):
                     if section[0] == str(Type.TypeID):
                         show = section[1]
                         break
-                if show == None:
+                if show is None:
                     fold = False
                     if (
                         Type.TypeID == MaterialID
@@ -6900,7 +6900,7 @@ Global_TocManager = TocManager()
 
 
 def register():
-    if Global_CPPHelper == None:
+    if Global_CPPHelper is None:
         raise Exception("HDTool_Helper is required by the addon but failed to load!")
     if not os.path.exists(Global_texconvpath):
         raise Exception("Texconv is not found, please install Texconv in /deps/")
