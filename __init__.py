@@ -1,3 +1,7 @@
+# ruff: noqa: F841
+# ruff: noqa: E401
+# ruff: noqa: E402
+
 bl_info = {
     "name": "Helldivers 2 SDK: Community Edition",
     "version": (2, 6, 1),
@@ -31,12 +35,12 @@ import bpy
 import mathutils
 import requests
 from bpy.props import (
-    BoolProperty,
+    BoolProperty,  # type:ignore
     CollectionProperty,
-    EnumProperty,
-    IntProperty,
+    EnumProperty,  # type:ignore
+    IntProperty,  # type:ignore
     PointerProperty,
-    StringProperty,
+    StringProperty,  # type:ignore
 )
 from bpy.types import Menu, Operator, Panel, PropertyGroup, Scene
 from bpy_extras.io_utils import ExportHelper, ImportHelper
@@ -841,7 +845,7 @@ def CreateModel(model, id, customization_info, bone_names, transform_info, bone_
                     and group_index != 0
                 ):
                     continue
-                if type(weights) != list:
+                if not isinstance(weights, list):
                     weights = [weights]
                 for weight_idx in range(len(weights)):
                     weight_value = weights[weight_idx]
@@ -2496,7 +2500,7 @@ class StingrayCompositeMesh:
         self.StreamInfoUnk2 = 0
         self.GpuData = None
 
-    def Serialize(self, f, gpu):
+    def Serialize(self, f, gpu, redo_offsets=False):
         self.unk1 = f.uint64(self.unk1)
         self.NumExternalMeshes = f.uint32(self.NumExternalMeshes)
         self.StreamInfoOffset = f.uint32(self.StreamInfoOffset)
@@ -4189,7 +4193,7 @@ class ChangeFilepathOperator(Operator, ImportHelper):
     # filename_ext = "."
     use_filter_folder = True
 
-    filter_glob: StringProperty(options={"HIDDEN"}, default="")
+    filter_glob: StringProperty(options={"HIDDEN"}, default="")  # type:ignore
 
     def __init__(self):
         global Global_gamepath
@@ -4220,7 +4224,7 @@ class ChangeSearchpathOperator(Operator, ImportHelper):
     bl_description = "Change the output directory for searching by entry ID"
     use_filter_folder = True
 
-    filter_glob: StringProperty(options={"HIDDEN"}, default="")
+    filter_glob: StringProperty(options={"HIDDEN"}, default="")  # type:ignore
 
     def __init__(self):
         global Global_searchpath
@@ -4264,8 +4268,8 @@ class LoadArchiveOperator(Operator, ImportHelper):
 
     files: CollectionProperty(
         type=bpy.types.OperatorFileListElement, options={"HIDDEN", "SKIP_SAVE"}
-    )
-    is_patch: BoolProperty(name="is_patch", default=False, options={"HIDDEN"})
+    )  # type: ignore
+    is_patch: BoolProperty(name="is_patch", default=False, options={"HIDDEN"})  # type:ignore
     # files = CollectionProperty(name='File paths', type=bpy.types.PropertyGroup)
 
     def __init__(self):
@@ -4329,10 +4333,10 @@ class BulkLoadOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.bulk_load"
     bl_description = "Loads archives from a list of patch names in a text file"
 
-    open_file_browser: BoolProperty(default=True, options={"HIDDEN"})
-    file: StringProperty(options={"HIDDEN"})
+    open_file_browser: BoolProperty(default=True, options={"HIDDEN"})  # type:ignore
+    file: StringProperty(options={"HIDDEN"})  # type: ignore # type:ignore
 
-    filter_glob: StringProperty(options={"HIDDEN"}, default="*.txt")
+    filter_glob: StringProperty(options={"HIDDEN"}, default="*.txt")  # type:ignore
 
     def execute(self, context):
         self.file = self.filepath
@@ -4361,7 +4365,7 @@ class SearchByEntryIDOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.search_by_entry"
     bl_description = "Search for Archives by their contained Entry IDs"
 
-    filter_glob: StringProperty(options={"HIDDEN"}, default="*.txt")
+    filter_glob: StringProperty(options={"HIDDEN"}, default="*.txt")  # type:ignore
 
     def execute(self, context):
         return SearchByEntryID(self, self.filepath)
@@ -4372,7 +4376,7 @@ class CreatePatchFromActiveOperator(Operator):
     bl_idname = "helldiver2.archive_createpatch"
     bl_description = "Creates Patch from Current Active Archive"
 
-    patch_name: StringProperty(name="Mod Name")
+    patch_name: StringProperty(name="Mod Name")  # type:ignore
 
     def execute(self, context):
         if ArchivesNotLoaded(self):
@@ -4414,7 +4418,7 @@ class RenamePatchOperator(Operator):
     bl_idname = "helldiver2.rename_patch"
     bl_description = "Change Name of Current Mod Within the Tool"
 
-    patch_name: StringProperty(name="Mod Name")
+    patch_name: StringProperty(name="Mod Name")  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -4447,7 +4451,7 @@ class ExportPatchAsZipOperator(Operator, ExportHelper):
 
     filename_ext = ".zip"
     use_filter_folder = True
-    filter_glob: StringProperty(default="*.zip", options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.zip", options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -4511,8 +4515,8 @@ class ArchiveEntryOperator(Operator):
     bl_label = "Archive Entry"
     bl_idname = "helldiver2.archive_entry"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         return {"FINISHED"}
@@ -4552,8 +4556,8 @@ class MaterialTextureEntryOperator(Operator):
     bl_label = "Texture Entry"
     bl_idname = "helldiver2.material_texture_entry"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         return {"FINISHED"}
@@ -4567,12 +4571,12 @@ class MaterialShaderVariableEntryOperator(Operator):
     bl_idname = "helldiver2.material_shader_variable"
     bl_description = "Material Shader Variable"
 
-    object_id: StringProperty()
-    variable_index: bpy.props.IntProperty()
-    value_index: bpy.props.IntProperty()
+    object_id: StringProperty()  # type:ignore
+    variable_index: bpy.props.IntProperty()  # type:ignore
+    value_index: bpy.props.IntProperty()  # type:ignore
     value: bpy.props.FloatProperty(
         name="Variable Value", description="Enter a floating point number"
-    )
+    )  # type: ignore
 
     def draw(self, context):
         layout = self.layout
@@ -4601,8 +4605,8 @@ class MaterialShaderVariableColorEntryOperator(Operator):
     bl_idname = "helldiver2.material_shader_variable_color"
     bl_description = "Material Shader Variable Color"
 
-    object_id: StringProperty()
-    variable_index: bpy.props.IntProperty()
+    object_id: StringProperty()  # type:ignore
+    variable_index: bpy.props.IntProperty()  # type:ignore # type:ignore
     color: bpy.props.FloatVectorProperty(
         name="Color",
         subtype="COLOR",
@@ -4610,7 +4614,7 @@ class MaterialShaderVariableColorEntryOperator(Operator):
         min=0.0,
         max=1.0,
         default=(1.0, 1.0, 1.0),
-    )
+    )  # type: ignore
 
     def draw(self, context):
         layout = self.layout
@@ -4653,8 +4657,8 @@ class AddEntryToPatchOperator(Operator):
     bl_idname = "helldiver2.archive_addtopatch"
     bl_description = "Adds Entry into Patch"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -4670,8 +4674,8 @@ class RemoveEntryFromPatchOperator(Operator):
     bl_label = "Remove Entry From Patch"
     bl_idname = "helldiver2.archive_removefrompatch"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
@@ -4684,8 +4688,8 @@ class UndoArchiveEntryModOperator(Operator):
     bl_label = "Remove Modifications"
     bl_idname = "helldiver2.archive_undo_mod"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
@@ -4700,7 +4704,7 @@ class DuplicateEntryOperator(Operator):
     bl_idname = "helldiver2.archive_duplicate"
     bl_description = "Duplicate Selected Entry"
 
-    NewFileID: StringProperty(name="NewFileID", default="")
+    NewFileID: StringProperty(name="NewFileID", default="")  # type:ignore
 
     def draw(self, context):
         global Global_randomID
@@ -4712,8 +4716,8 @@ class DuplicateEntryOperator(Operator):
         row = layout.row()
         row.prop(self, "NewFileID", icon="COPY_ID")
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         global Global_randomID
@@ -4751,15 +4755,15 @@ class RenamePatchEntryOperator(Operator):
     bl_label = "Rename Entry"
     bl_idname = "helldiver2.archive_entryrename"
 
-    NewFileID: StringProperty(name="NewFileID", default="")
+    NewFileID: StringProperty(name="NewFileID", default="")  # type:ignore
 
     def draw(self, context):
         layout = self.layout
         row = layout.row()
         row.prop(self, "NewFileID", icon="COPY_ID")
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entry = Global_TocManager.GetPatchEntry_B(
@@ -4783,11 +4787,11 @@ class DumpArchiveObjectOperator(Operator):
     bl_idname = "helldiver2.archive_object_dump_export"
     bl_description = "Dumps Entry's Contents"
 
-    directory: StringProperty(name="Outdir Path", description="dump output dir")
-    filter_folder: BoolProperty(default=True, options={"HIDDEN"})
+    directory: StringProperty(name="Outdir Path", description="dump output dir")  # type:ignore
+    filter_folder: BoolProperty(default=True, options={"HIDDEN"})  # type:ignore
 
-    object_id: StringProperty(options={"HIDDEN"})
-    object_typeid: StringProperty(options={"HIDDEN"})
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
+    object_typeid: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
@@ -4815,8 +4819,8 @@ class ImportDumpOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.archive_object_dump_import"
     bl_description = "Loads Raw Dump"
 
-    object_id: StringProperty(options={"HIDDEN"})
-    object_typeid: StringProperty(options={"HIDDEN"})
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
+    object_typeid: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         if Global_TocManager.ActivePatch is None:
@@ -4864,7 +4868,7 @@ class ImportStingrayMeshOperator(Operator):
     bl_idname = "helldiver2.archive_mesh_import"
     bl_description = "Loads Mesh into Blender Scene"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         EntriesIDs = IDsFromString(self.object_id)
@@ -4897,7 +4901,7 @@ class SaveStingrayMeshOperator(Operator):
     bl_description = "Saves Mesh"
     bl_options = {"REGISTER", "UNDO"}
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         mode = context.mode
@@ -5048,7 +5052,7 @@ class SaveTextureFromBlendImageOperator(Operator):
     bl_idname = "helldiver2.texture_saveblendimage"
     bl_description = "Saves Texture"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5077,7 +5081,7 @@ class ImportTextureOperator(Operator):
     bl_idname = "helldiver2.texture_import"
     bl_description = "Loads Texture into Blender Project"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         EntriesIDs = IDsFromString(self.object_id)
@@ -5093,13 +5097,13 @@ class ExportTextureOperator(Operator, ExportHelper):
     bl_description = "Export Texture to a Desired File Location"
     filename_ext = ".dds"
 
-    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})
-    object_id: StringProperty(options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})  # type:ignore
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
         if Entry is not None:
-            data = Entry.Load(False, False)
+            Entry.Load(False, False)
             with open(self.filepath, "w+b") as f:
                 f.write(Entry.LoadedData.ToDDS())
         return {"FINISHED"}
@@ -5124,8 +5128,8 @@ class ExportTexturePNGOperator(Operator, ExportHelper):
     bl_description = "Export Texture to a Desired File Location"
     filename_ext = ".png"
 
-    filter_glob: StringProperty(default="*.png", options={"HIDDEN"})
-    object_id: StringProperty(options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.png", options={"HIDDEN"})  # type:ignore
+    object_id: StringProperty(options={"HIDDEN"})  # type: ignore # type:ignore
 
     def execute(self, context):
         Global_TocManager.Load(int(self.object_id), TexID)
@@ -5177,10 +5181,10 @@ class BatchExportTextureOperator(Operator):
     bl_description = "Export Textures to a Desired File Location"
     filename_ext = ".dds"
 
-    directory: StringProperty(name="Outdir Path", description="dds output dir")
-    filter_folder: BoolProperty(default=True, options={"HIDDEN"})
+    directory: StringProperty(name="Outdir Path", description="dds output dir")  # type:ignore
+    filter_folder: BoolProperty(default=True, options={"HIDDEN"})  # type:ignore
 
-    object_id: StringProperty(options={"HIDDEN"})
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         EntriesIDs = IDsFromString(self.object_id)
@@ -5203,10 +5207,10 @@ class BatchExportTexturePNGOperator(Operator):
     bl_description = "Export Textures to a Desired File Location"
     filename_ext = ".png"
 
-    directory: StringProperty(name="Outdir Path", description="png output dir")
-    filter_folder: BoolProperty(default=True, options={"HIDDEN"})
+    directory: StringProperty(name="Outdir Path", description="png output dir")  # type:ignore
+    filter_folder: BoolProperty(default=True, options={"HIDDEN"})  # type:ignore
 
-    object_id: StringProperty(options={"HIDDEN"})
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         EntriesIDs = IDsFromString(self.object_id)
@@ -5253,8 +5257,8 @@ class SaveTextureFromDDSOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.texture_savefromdds"
     bl_description = "Override Current Texture with a Selected DDS File"
 
-    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})
-    object_id: StringProperty(options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})  # type:ignore
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5289,8 +5293,8 @@ class SaveTextureFromPNGOperator(Operator, ImportHelper):
     bl_idname = "helldiver2.texture_savefrompng"
     bl_description = "Override Current Texture with a Selected PNG File"
 
-    filter_glob: StringProperty(default="*.png", options={"HIDDEN"})
-    object_id: StringProperty(options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.png", options={"HIDDEN"})  # type:ignore
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5357,7 +5361,7 @@ class SaveMaterialOperator(Operator):
     bl_idname = "helldiver2.material_save"
     bl_description = "Saves Material"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5373,7 +5377,7 @@ class ImportMaterialOperator(Operator):
     bl_idname = "helldiver2.material_import"
     bl_description = "Loads Materials into Blender Project"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         EntriesIDs = IDsFromString(self.object_id)
@@ -5388,7 +5392,7 @@ class AddMaterialOperator(Operator):
     bl_description = "Adds a New Material to Current Active Patch"
 
     global Global_Materials
-    selected_material: EnumProperty(items=Global_Materials, name="Template", default=0)
+    selected_material: EnumProperty(items=Global_Materials, name="Template", default=0)  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5413,9 +5417,9 @@ class SetMaterialTemplateOperator(Operator):
     bl_description = "Sets the material to a modded material template"
 
     global Global_Materials
-    selected_material: EnumProperty(items=Global_Materials, name="Template", default=0)
+    selected_material: EnumProperty(items=Global_Materials, name="Template", default=0)  # type:ignore
 
-    entry_id: StringProperty()
+    entry_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         if PatchesNotLoaded(self):
@@ -5470,7 +5474,7 @@ class ShowMaterialEditorOperator(Operator):
     bl_idname = "helldiver2.material_showeditor"
     bl_description = "Show List of Textures in Material"
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), MaterialID)
@@ -5491,10 +5495,10 @@ class SetMaterialTexture(Operator, ImportHelper):
 
     filename_ext = ".dds"
 
-    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})
+    filter_glob: StringProperty(default="*.dds", options={"HIDDEN"})  # type:ignore
 
-    object_id: StringProperty(options={"HIDDEN"})
-    tex_idx: IntProperty(options={"HIDDEN"})
+    object_id: StringProperty(options={"HIDDEN"})  # type:ignore
+    tex_idx: IntProperty(options={"HIDDEN"})  # type:ignore
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), MaterialID)
@@ -5520,8 +5524,8 @@ class CopyArchiveEntryOperator(Operator):
     bl_idname = "helldiver2.archive_copy"
     bl_description = "Copy Selected Entries"
 
-    object_id: StringProperty()
-    object_typeid: StringProperty()
+    object_id: StringProperty()  # type:ignore
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
@@ -5554,7 +5558,7 @@ class CopyTextOperator(Operator):
     bl_idname = "helldiver2.copytest"
     bl_description = "Copies Entry Information"
 
-    text: StringProperty()
+    text: StringProperty()  # type:ignore
 
     def execute(self, context):
         cmd = "echo " + str(self.text).strip() + "|clip"
@@ -5573,7 +5577,7 @@ class LoadArchivesOperator(Operator):
     bl_idname = "helldiver2.archives_import"
     bl_description = "Loads Selected Archive"
 
-    paths_str: StringProperty(name="paths_str")
+    paths_str: StringProperty(name="paths_str")  # type:ignore
 
     def execute(self, context):
         global Global_TocManager
@@ -5596,7 +5600,7 @@ class SearchArchivesOperator(Operator):
     bl_idname = "helldiver2.search_archives"
     bl_description = "Search from Found Archives"
 
-    SearchField: StringProperty(name="SearchField", default="")
+    SearchField: StringProperty(name="SearchField", default="")  # type:ignore
 
     def draw(self, context):
         layout = self.layout
@@ -5647,7 +5651,7 @@ class SelectAllOfTypeOperator(Operator):
     bl_idname = "helldiver2.select_type"
     bl_description = "Selects All of Type in Section"
 
-    object_typeid: StringProperty()
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entries = GetDisplayData()[0]
@@ -5667,7 +5671,7 @@ class ImportAllOfTypeOperator(Operator):
     bl_label = "Import All Of Type"
     bl_idname = "helldiver2.import_type"
 
-    object_typeid: StringProperty()
+    object_typeid: StringProperty()  # type:ignore
 
     def execute(self, context):
         Entries = GetDisplayData()[0]
@@ -5702,7 +5706,7 @@ class SetEntryFriendlyNameOperator(Operator):
     bl_idname = "helldiver2.archive_setfriendlyname"
     bl_description = "Change Entry Display Name"
 
-    NewFriendlyName: StringProperty(name="NewFriendlyName", default="")
+    NewFriendlyName: StringProperty(name="NewFriendlyName", default="")  # type:ignore
 
     def draw(self, context):
         layout = self.layout
@@ -5715,7 +5719,7 @@ class SetEntryFriendlyNameOperator(Operator):
             row.label(text="Hash is incorrect")
         row.label(text=str(Hash64(str(self.NewFriendlyName))))
 
-    object_id: StringProperty()
+    object_id: StringProperty()  # type:ignore
 
     def execute(self, context):
         AddFriendlyName(int(self.object_id), str(self.NewFriendlyName))
@@ -5927,7 +5931,7 @@ class EntrySectionOperator(Operator):
     bl_idname = "helldiver2.collapse_section"
     bl_description = "Fold Current Section"
 
-    type: StringProperty(default="")
+    type: StringProperty(default="")  # type:ignore
 
     def execute(self, context):
         global Global_Foldouts
@@ -5965,98 +5969,98 @@ def Patches_callback(scene, context):
 
 class Hd2ToolPanelSettings(PropertyGroup):
     # Patches
-    Patches: EnumProperty(name="Patches", items=Patches_callback)
-    PatchOnly: BoolProperty(
+    Patches: EnumProperty(name="Patches", items=Patches_callback)  # type:ignore
+    PatchOnly: BoolProperty(  # type:ignore
         name="Show Patch Entries Only",
         description="Filter list to entries present in current patch",
         default=False,
     )
     # Archive
-    ContentsExpanded: BoolProperty(default=True)
-    LoadedArchives: EnumProperty(name="LoadedArchives", items=LoadedArchives_callback)
+    ContentsExpanded: BoolProperty(default=True)  # type:ignore
+    LoadedArchives: EnumProperty(name="LoadedArchives", items=LoadedArchives_callback)  # type:ignore
     # Settings
-    MenuExpanded: BoolProperty(default=False)
+    MenuExpanded: BoolProperty(default=False)  # type:ignore
 
-    ShowExtras: BoolProperty(name="Extra", description="Show Extras", default=False)
+    ShowExtras: BoolProperty(name="Extra", description="Show Extras", default=False)  # type:ignore
 
-    ImportMaterials: BoolProperty(
+    ImportMaterials: BoolProperty(  # type:ignore
         name="Import Materials",
         description="Fully import materials by appending the textures utilized, otherwise create placeholders",
         default=True,
     )
-    ImportLods: BoolProperty(
+    ImportLods: BoolProperty(  # type:ignore
         name="Import LODs", description="Import LODs", default=False
     )
-    ImportGroup0: BoolProperty(
+    ImportGroup0: BoolProperty(  # type:ignore
         name="Import Group 0 Only",
         description="Only import the first vertex group, ignore others",
         default=True,
     )
-    ImportPhysics: BoolProperty(
+    ImportPhysics: BoolProperty(  # type:ignore
         name="Import Physics", description="Import Physics Bodies", default=False
     )
-    ImportStatic: BoolProperty(
+    ImportStatic: BoolProperty(  # type:ignore
         name="Import Static Meshes", description="Import Static Meshes", default=False
     )
-    MakeCollections: BoolProperty(
+    MakeCollections: BoolProperty(  # type:ignore
         name="Make Collections",
         description="Make new collection when importing meshes",
         default=False,
     )
-    Force2UVs: BoolProperty(
+    Force2UVs: BoolProperty(  # type:ignore
         name="Force 2 UV Sets",
         description="Force at least 2 UV sets, some materials require this",
         default=True,
     )
-    Force1Group: BoolProperty(
+    Force1Group: BoolProperty(  # type:ignore
         name="Force 1 Group",
         description="Force mesh to only have 1 vertex group",
         default=True,
     )
-    AutoLods: BoolProperty(
+    AutoLods: BoolProperty(  # type:ignore
         name="Auto LODs",
         description="Automatically generate LOD entries based on LOD0, does not actually reduce the quality of the mesh",
         default=True,
     )
-    RemoveGoreMeshes: BoolProperty(
+    RemoveGoreMeshes: BoolProperty(  # type:ignore
         name="Remove Gore Meshes",
         description="Automatically delete all of the verticies with the gore material when loading a model",
         default=False,
     )
     # Search
-    SearchField: StringProperty(default="")
+    SearchField: StringProperty(default="")  # type:ignore
 
     # Tools
-    EnableTools: BoolProperty(
+    EnableTools: BoolProperty(  # type:ignore
         name="Research Tools",
         description="Custom Archive Searching Tools",
         default=False,
     )
-    UnloadEmptyArchives: BoolProperty(
+    UnloadEmptyArchives: BoolProperty(  # type:ignore
         name="Unload Empty Archives",
         description="Unload Archives that do not Contain any Textures, Materials, or Meshes",
         default=True,
     )
-    DeleteOnLoadArchive: BoolProperty(
+    DeleteOnLoadArchive: BoolProperty(  # type:ignore
         name="Nuke Files on Archive Load",
         description="Delete all Textures, Materials, and Meshes in project when selecting a new archive",
         default=False,
     )
-    ForceSearchAll: BoolProperty(
+    ForceSearchAll: BoolProperty(  # type:ignore
         name="Force Search All Files",
         description="Searches for all IDs in every file instead of ending early",
     )
-    UnloadPatches: BoolProperty(
+    UnloadPatches: BoolProperty(  # type:ignore
         name="Unload Previous Patches",
         description="Unload Previous Patches when bulk loading",
     )
 
-    SaveNonSDKMaterials: BoolProperty(
+    SaveNonSDKMaterials: BoolProperty(  # type:ignore
         name="Save Non-SDK Materials",
         description="Toggle if non-SDK materials should be autosaved when saving a mesh",
         default=False,
     )
-    LegacyWeightNames: BoolProperty(
+    LegacyWeightNames: BoolProperty(  # type:ignore
         name="Legacy Weight Names",
         description="Brings back the old naming system for vertex groups using the X_Y schema",
         default=False,
