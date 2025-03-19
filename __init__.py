@@ -229,9 +229,9 @@ def UpdateArchiveHashes():
         if req.status_code == requests.codes.ok:
             file = open(Global_archivehashpath, "w")
             file.write(req.text)
-            PrettyPrint(f"Updated Archive Hashes File")
+            PrettyPrint("Updated Archive Hashes File")
         else:
-            PrettyPrint(f"Request Failed, Could not update Archive Hashes File", "warn")
+            PrettyPrint("Request Failed, Could not update Archive Hashes File", "warn")
     except requests.ConnectionError:
         PrettyPrint("Connection failed. Please check your network settings.", "warn")
     except requests.HTTPError as err:
@@ -421,19 +421,19 @@ def GetDisplayData():
     DisplayTocTypes = []
     DisplayArchive = Global_TocManager.ActiveArchive
     if bpy.context.scene.Hd2ToolPanelSettings.PatchOnly:
-        if Global_TocManager.ActivePatch != None:
+        if Global_TocManager.ActivePatch is not None:
             DisplayTocEntries = [
                 [Entry, True] for Entry in Global_TocManager.ActivePatch.TocEntries
             ]
             DisplayTocTypes = Global_TocManager.ActivePatch.TocTypes
-    elif Global_TocManager.ActiveArchive != None:
+    elif Global_TocManager.ActiveArchive is not None:
         DisplayTocEntries = [
             [Entry, False] for Entry in Global_TocManager.ActiveArchive.TocEntries
         ]
         DisplayTocTypes = [Type for Type in Global_TocManager.ActiveArchive.TocTypes]
         AddedTypes = [Type.TypeID for Type in DisplayTocTypes]
         AddedEntries = [Entry[0].FileID for Entry in DisplayTocEntries]
-        if Global_TocManager.ActivePatch != None:
+        if Global_TocManager.ActivePatch is not None:
             for Type in Global_TocManager.ActivePatch.TocTypes:
                 if Type.TypeID not in AddedTypes:
                     AddedTypes.append(Type.TypeID)
@@ -456,7 +456,7 @@ def ApplyAllTransforms(self, FileID):
                 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
                 obj.rotation_mode = "QUATERNION"
                 obj.select_set(False)
-        except:
+        except Exception:
             id = None
 
 
@@ -503,7 +503,7 @@ def PrepareMesh(og_object):
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.uv.select_all(action="SELECT")
         bpy.ops.uv.seams_from_islands()
-    except:
+    except Exception:
         PrettyPrint(
             "Failed to create seams from UV islands. This is not fatal, but will likely cause undesirable results in-game",
             "warn",
@@ -539,7 +539,7 @@ def PrepareMesh(og_object):
     try:
         bpy.ops.object.vertex_group_normalize_all(lock_active=False)
         bpy.ops.object.vertex_group_limit_total(group_select_mode="ALL", limit=4)
-    except:
+    except Exception:
         pass
 
     return object
@@ -668,7 +668,7 @@ def GetMeshData(og_object):
     for material in NewMesh.Materials:
         try:
             material.DEV_BoneInfoOverride = int(og_object[f"matslot{matNum}"])
-        except:
+        except Exception:
             pass
         matNum += 1
 
@@ -710,7 +710,7 @@ def NameFromMesh(mesh, id, customization_info, bone_names, use_sufix=True):
     if use_sufix:
         name = name + name_sufix
 
-    if use_sufix and bone_names != None:
+    if use_sufix and bone_names is not None:
         for bone_name in bone_names:
             if Hash32(bone_name) == mesh.MeshID:
                 name = bone_name
@@ -880,7 +880,7 @@ def CreateModel(model, id, customization_info, bone_names, transform_info, bone_
             # append material to slot
             try:
                 new_object.data.materials.append(bpy.data.materials[material.MatID])
-            except:
+            except Exception:
                 raise Exception(
                     f"Tool was unable to find material that this mesh uses, ID: {material.MatID}"
                 )
@@ -892,7 +892,7 @@ def CreateModel(model, id, customization_info, bone_names, transform_info, bone_
             matNum += 1
         # remove gore mesh
         if bpy.context.scene.Hd2ToolPanelSettings.RemoveGoreMeshes and goreIndex:
-            PrettyPrint(f"Removing Gore Mesh")
+            PrettyPrint("Removing Gore Mesh")
             verticies = []
             for vert in bm.verts:
                 if len(vert.link_faces) == 0:
@@ -906,7 +906,7 @@ def CreateModel(model, id, customization_info, bone_names, transform_info, bone_
 
         # Create skeleton
         if False:
-            if mesh.DEV_BoneInfo != None:
+            if mesh.DEV_BoneInfo is not None:
                 for Bone in mesh.DEV_BoneInfo.Bones:
                     current_pos = [Bone.v[12], Bone.v[13], Bone.v[14]]
                     bpy.ops.object.empty_add(
@@ -1139,7 +1139,7 @@ def InitializeConfig():
         try:
             Global_gamepath = config["DEFAULT"]["filepath"]
             Global_searchpath = config["DEFAULT"]["searchpath"]
-        except:
+        except Exception:
             UpdateConfig()
         PrettyPrint(f"Loaded Data Folder: {Global_gamepath}")
 
@@ -1275,7 +1275,7 @@ class TocEntry:
         if callback == None:
             callback = LoadStingrayDump
 
-        if callback != None:
+        if callback is not None:
             self.LoadedData = callback(
                 self.FileID,
                 self.TocData,
@@ -1310,7 +1310,7 @@ class TocEntry:
                             if objectTransforms not in self.Transforms:
                                 self.Transforms.append(objectTransforms)
                             PrettyPrint(self.Transforms)
-                    except:
+                    except Exception:
                         PrettyPrint(f"Object: {object.name} has No HD2 Properties")
 
     # -- Write Data -- #
@@ -1473,14 +1473,14 @@ class StreamToc:
         return None
 
     def AddEntry(self, NewEntry):
-        if self.GetEntry(NewEntry.FileID, NewEntry.TypeID) != None:
+        if self.GetEntry(NewEntry.FileID, NewEntry.TypeID) is not None:
             raise Exception("Entry with same ID already exists")
         self.TocEntries.append(NewEntry)
         self.UpdateTypes()
 
     def RemoveEntry(self, FileID, TypeID):
         Entry = self.GetEntry(FileID, TypeID)
-        if Entry != None:
+        if Entry is not None:
             self.TocEntries.remove(Entry)
             self.UpdateTypes()
 
@@ -1630,25 +1630,25 @@ class TocManager:
     # ---- Entry Code ---- #
     def GetEntry(self, FileID, TypeID, SearchAll=False, IgnorePatch=False):
         # Check Active Patch
-        if not IgnorePatch and self.ActivePatch != None:
+        if not IgnorePatch and self.ActivePatch is not None:
             Entry = self.ActivePatch.GetEntry(FileID, TypeID)
-            if Entry != None:
+            if Entry is not None:
                 return Entry
         # Check Active Archive
-        if self.ActiveArchive != None:
+        if self.ActiveArchive is not None:
             Entry = self.ActiveArchive.GetEntry(FileID, TypeID)
-            if Entry != None:
+            if Entry is not None:
                 return Entry
         # Check All Loaded Archives
         for Archive in self.LoadedArchives:
             Entry = Archive.GetEntry(FileID, TypeID)
-            if Entry != None:
+            if Entry is not None:
                 return Entry
         # Check All Search Archives
         if SearchAll:
             for Archive in self.SearchArchives:
                 Entry = Archive.GetEntry(FileID, TypeID)
-                if Entry != None:
+                if Entry is not None:
                     return self.LoadArchive(Archive.Path, False).GetEntry(
                         FileID, TypeID
                     )
@@ -1656,7 +1656,7 @@ class TocManager:
 
     def Load(self, FileID, TypeID, Reload=False, SearchAll=False):
         Entry = self.GetEntry(FileID, TypeID, SearchAll)
-        if Entry != None:
+        if Entry is not None:
             Entry.Load(Reload)
 
     def Save(self, FileID, TypeID):
@@ -1676,11 +1676,11 @@ class TocManager:
         if self.ActivePatch:
             dup = deepcopy(Entry)
             dup.IsCreated = True
-            # if self.ActivePatch.GetEntry(dup.FileID, dup.TypeID) != None and NewID == None:
+            # if self.ActivePatch.GetEntry(dup.FileID, dup.TypeID) is not None and NewID == None:
             #     GenID = True
             if GenID and NewID == None:
                 dup.FileID = RandomHash16()
-            if NewID != None:
+            if NewID is not None:
                 dup.FileID = NewID
 
             self.ActivePatch.AddEntry(dup)
@@ -1688,7 +1688,7 @@ class TocManager:
     def Copy(self, Entries):
         self.CopyBuffer = []
         for Entry in Entries:
-            if Entry != None:
+            if Entry is not None:
                 self.CopyBuffer.append(Entry)
 
     def Paste(self, GenID=False, NewID=None):
@@ -1746,7 +1746,7 @@ class TocManager:
             raise Exception("No patch exists, please create one first")
 
         Entry = self.GetEntry(FileID, TypeID)
-        if Entry != None:
+        if Entry is not None:
             PatchEntry = deepcopy(Entry)
             if PatchEntry.IsSelected:
                 self.SelectEntries([PatchEntry], True)
@@ -1755,24 +1755,24 @@ class TocManager:
         return None
 
     def RemoveEntryFromPatch(self, FileID, TypeID):
-        if self.ActivePatch != None:
+        if self.ActivePatch is not None:
             self.ActivePatch.RemoveEntry(FileID, TypeID)
         return None
 
     def GetPatchEntry(self, Entry):
-        if self.ActivePatch != None:
+        if self.ActivePatch is not None:
             return self.ActivePatch.GetEntry(Entry.FileID, Entry.TypeID)
         return None
 
     def GetPatchEntry_B(self, FileID, TypeID):
-        if self.ActivePatch != None:
+        if self.ActivePatch is not None:
             return self.ActivePatch.GetEntry(FileID, TypeID)
         return None
 
     def IsInPatch(self, Entry):
-        if self.ActivePatch != None:
+        if self.ActivePatch is not None:
             PatchEntry = self.ActivePatch.GetEntry(Entry.FileID, Entry.TypeID)
-            if PatchEntry != None:
+            if PatchEntry is not None:
                 return True
             else:
                 return False
@@ -1780,7 +1780,7 @@ class TocManager:
 
     def DuplicateEntry(self, FileID, TypeID, NewID):
         Entry = self.GetEntry(FileID, TypeID)
-        if Entry != None:
+        if Entry is not None:
             self.CopyPaste(Entry, False, NewID)
 
 
@@ -1872,7 +1872,7 @@ def LoadStingrayMaterial(ID, TocData, GpuData, StreamData, Reload, MakeBlendObje
     try:
         mat = bpy.data.materials[str(ID)]
         force_reload = True
-    except:
+    except Exception:
         exists = False
 
     f = MemoryStream(TocData)
@@ -1886,13 +1886,13 @@ def LoadStingrayMaterial(ID, TocData, GpuData, StreamData, Reload, MakeBlendObje
 
 
 def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
-    if self.MaterialTemplate != None:
+    if self.MaterialTemplate is not None:
         texturesFilepaths = GenerateMaterialTextures(self)
     mat = LoadedData
     index = 0
     for TexIdx in range(len(mat.TexIDs)):
         oldTexID = mat.TexIDs[TexIdx]
-        if mat.DEV_DDSPaths[TexIdx] != None:
+        if mat.DEV_DDSPaths[TexIdx] is not None:
             # get texture data
             StingrayTex = StingrayTexture()
             with open(mat.DEV_DDSPaths[TexIdx], "r+b") as f:
@@ -1912,18 +1912,18 @@ def SaveStingrayMaterial(self, ID, TocData, GpuData, StreamData, LoadedData):
         else:
             Global_TocManager.Load(int(mat.TexIDs[TexIdx]), TexID, False, True)
             Entry = Global_TocManager.GetEntry(int(mat.TexIDs[TexIdx]), TexID, True)
-            if Entry != None:
+            if Entry is not None:
                 Entry = deepcopy(Entry)
                 Entry.FileID = RandomHash16()
                 Entry.IsCreated = True
                 Global_TocManager.AddNewEntryToPatch(Entry)
                 mat.TexIDs[TexIdx] = Entry.FileID
-        if self.MaterialTemplate != None:
+        if self.MaterialTemplate is not None:
             path = texturesFilepaths[index]
             if not os.path.exists(path):
                 raise Exception(f"Could not find file at path: {path}")
             if not Entry:
-                raise Exception(f"Could not find or generate texture entry")
+                raise Exception("Could not find or generate texture entry")
             SaveImagePNG(path, Entry.FileID)
         Global_TocManager.RemoveEntryFromPatch(oldTexID, TexID)
         index += 1
@@ -1937,7 +1937,7 @@ def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
         mat = bpy.data.materials[str(ID)]
         PrettyPrint(f"Found material for ID: {ID} Skipping creation of new material")
         return
-    except:
+    except Exception:
         PrettyPrint(
             f"Unable to find material in blender scene for ID: {ID} creating new material"
         )
@@ -1953,7 +1953,7 @@ def AddMaterialToBlend(ID, StingrayMat, EmptyMatExists=False):
     if Entry == None:
         PrettyPrint(f"No Entry Found when getting Material ID: {ID}", "ERROR")
         return
-    if Entry.MaterialTemplate != None:
+    if Entry.MaterialTemplate is not None:
         CreateAddonMaterial(ID, StingrayMat, mat, Entry)
     else:
         CreateGameMaterial(StingrayMat, mat)
@@ -1971,11 +1971,11 @@ def CreateGameMaterial(StingrayMat, mat):
 
         try:
             bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             Global_TocManager.Load(TextureID, TexID, False, True)
         try:
             texImage.image = bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             PrettyPrint(
                 f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes",
                 "warn",
@@ -2013,11 +2013,11 @@ def CreateAddonMaterial(ID, StingrayMat, mat, Entry):
 
         try:
             bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             Global_TocManager.Load(TextureID, TexID, False, True)
         try:
             texImage.image = bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             PrettyPrint(
                 f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes",
                 "warn",
@@ -2169,12 +2169,12 @@ def CreateGenericMaterial(ID, StingrayMat, mat):
         # Load Texture
         try:
             bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             Global_TocManager.Load(TextureID, TexID, False, True)
         # Apply Texture
         try:
             texImage.image = bpy.data.images[str(TextureID)]
-        except:
+        except Exception:
             PrettyPrint(
                 f"Failed to load texture {TextureID}. This is not fatal, but does mean that the materials in Blender will have empty image texture nodes",
                 "warn",
@@ -2186,7 +2186,7 @@ def CreateGenericMaterial(ID, StingrayMat, mat):
 def AddMaterialToBlend_EMPTY(ID):
     try:
         bpy.data.materials[str(ID)]
-    except:
+    except Exception:
         mat = bpy.data.materials.new(str(ID))
         mat.name = str(ID)
         r.seed(ID)
@@ -2332,7 +2332,7 @@ def LoadStingrayTexture(ID, TocData, GpuData, StreamData, Reload, MakeBlendObjec
     exists = True
     try:
         bpy.data.images[str(ID)]
-    except:
+    except Exception:
         exists = False
 
     StingrayTex = StingrayTexture()
@@ -2413,7 +2413,7 @@ def SaveStingrayTexture(self, ID, TocData, GpuData, StreamData, LoadedData):
     exists = True
     try:
         bpy.data.images[str(ID)]
-    except:
+    except Exception:
         exists = False
 
     Toc = MemoryStream(IOMode="write")
@@ -2683,7 +2683,7 @@ class CustomizationInfo:  # READ ONLY
             f.seek(f.tell() + 12)
             length = f.uint32(0)
             self.PieceType = bytes(f.bytes(b"", length)).replace(b"\x00", b"").decode()
-        except:
+        except Exception:
             self.BodyType = ""
             self.Slot = ""
             self.Weight = ""
@@ -3066,7 +3066,7 @@ class RawMaterialClass:
             try:
                 self.MatID = int(name)
                 self.ShortID = r.randint(1, 0xFFFFFFFF)
-            except:
+            except Exception:
                 raise Exception("Material name must be a number")
 
 
@@ -3202,7 +3202,7 @@ class StingrayMeshFile:
                     Section.IndexOffset = Order  # /
 
                     # This doesnt do what it was intended to do
-                    if Material.DEV_BoneInfoOverride != None:
+                    if Material.DEV_BoneInfoOverride is not None:
                         PrettyPrint("Overriding unknown material values")
                         Section.unk1 = Material.DEV_BoneInfoOverride
                         Section.unk2 = Material.DEV_BoneInfoOverride
@@ -3218,7 +3218,7 @@ class StingrayMeshFile:
                         # if int(Material.MatID) not in self.MaterialIDs:
                         self.MaterialIDs.append(int(Material.MatID))
                         self.SectionsIDs.append(int(Material.ShortID))
-                    except:
+                    except Exception:
                         pass
 
         # serialize file
@@ -3247,7 +3247,7 @@ class StingrayMeshFile:
         # Get composite file
         if f.IsReading() and self.CompositeRef != 0:
             Entry = Global_TocManager.GetEntry(self.CompositeRef, CompositeMeshID)
-            if Entry != None:
+            if Entry is not None:
                 Global_TocManager.Load(Entry.FileID, Entry.TypeID)
                 self.StreamInfoArray = Entry.LoadedData.StreamInfoArray
                 gpu = Entry.LoadedData.GpuData
@@ -3259,7 +3259,7 @@ class StingrayMeshFile:
         # Get bones file
         if f.IsReading() and self.BonesRef != 0:
             Entry = Global_TocManager.GetEntry(self.BonesRef, Hash64("bones"))
-            if Entry != None:
+            if Entry is not None:
                 Global_TocManager.Load(Entry.FileID, Entry.TypeID)
                 self.BoneNames = Entry.LoadedData.Names
                 self.BoneHashes = Entry.LoadedData.BoneHashes
@@ -3287,8 +3287,8 @@ class StingrayMeshFile:
             UnreversedData1Size = len(self.UnReversedData1)
         try:
             self.UnReversedData1 = f.bytes(self.UnReversedData1, UnreversedData1Size)
-        except:
-            PrettyPrint(f"Could not set UnReversedData1", "ERROR")
+        except Exception:
+            PrettyPrint("Could not set UnReversedData1", "ERROR")
 
         # Bone Info
         if f.IsReading():
@@ -3489,7 +3489,7 @@ class StingrayMeshFile:
                     else:
                         try:
                             bpy.data.materials[mat.MatID]
-                        except:
+                        except Exception:
                             bpy.data.materials.new(mat.MatID)
                     mat.StartIndex = TotalIndex * 3
                     mat.NumIndices = Section.NumIndices
@@ -3597,7 +3597,7 @@ class StingrayMeshFile:
                         tangent = Component.SerializeComponent(
                             gpu, mesh.VertexTangents[vidx]
                         )
-                        if tangent != None:
+                        if tangent is not None:
                             mesh.VertexTangents[vidx] = tangent[:3]
 
                     # BiTangents
@@ -3605,7 +3605,7 @@ class StingrayMeshFile:
                         bitangent = Component.SerializeComponent(
                             gpu, mesh.VertexBiTangents[vidx]
                         )
-                        if bitangent != None:
+                        if bitangent is not None:
                             mesh.VertexBiTangents[vidx] = bitangent[:3]
 
                     # Get Vertex UVs
@@ -3620,7 +3620,7 @@ class StingrayMeshFile:
                         color = Component.SerializeComponent(
                             gpu, mesh.VertexColors[vidx]
                         )
-                        if color != None:
+                        if color is not None:
                             mesh.VertexColors[vidx] = color[:4]
 
                     # Get Bone Indices
@@ -3631,7 +3631,7 @@ class StingrayMeshFile:
                                     gpu, mesh.VertexBoneIndices[Component.Index][vidx]
                                 )
                             )
-                        except:
+                        except Exception:
                             raise Exception(
                                 f"Vertex bone index out of range. Component index: {Component.Index} vidx: {vidx}"
                             )
@@ -3736,7 +3736,7 @@ class StingrayMeshFile:
             ]
             try:
                 NewMesh.DEV_BoneInfo = self.BoneInfoArray[Mesh_Info.LodIndex]
-            except:
+            except Exception:
                 pass
             numUVs = 0
             numBoneIndices = 0
@@ -3873,7 +3873,7 @@ def SaveStingrayMesh(self, ID, TocData, GpuData, StreamData, StingrayMesh):
             if mesh.LodIndex == 0:
                 lod0 = mesh
         # print(lod0)
-        if lod0 != None:
+        if lod0 is not None:
             for n in range(len(FinalMeshes)):
                 if FinalMeshes[n].IsLod():
                     newmesh = deepcopy(lod0)
@@ -3938,13 +3938,13 @@ def IncorrectVertexGroupNaming(self):
         try:
             ID = obj["Z_ObjectID"]
             InfoIndex = obj["MeshInfoIndex"]
-        except:
+        except Exception:
             self.report({"ERROR"}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
         groups = GetVertexGroupsFromID(ID, InfoIndex)
         if groups == None or len(groups) == 0:
             self.report(
-                {"WARNING"}, f"No Prior Loaded Vertex Groups Found, This May be Correct"
+                {"WARNING"}, "No Prior Loaded Vertex Groups Found, This May be Correct"
             )
             return False
         if len(obj.vertex_groups) <= 0:
@@ -3995,12 +3995,12 @@ def AllTransformsApplied(self):
         try:
             ID = obj["Z_ObjectID"]
             InfoIndex = obj["MeshInfoIndex"]
-        except:
+        except Exception:
             self.report({"ERROR"}, f"Couldn't find HD2 Properties in {obj.name}")
             return True
         transforms = GetTransformsFromID(ID, InfoIndex)
         if (
-            transforms != None
+            transforms is not None
             and obj.location == transforms[0]
             and obj.rotation_euler == transforms[1]
             and obj.scale == transforms[2]
@@ -4124,7 +4124,7 @@ def SearchByEntryID(self, file):
                         if str(entry.FileID) == ID:
                             try:
                                 name = fileID.split(" ", 1)[1]
-                            except:
+                            except Exception:
                                 name = "No Name"
                             PrettyPrint("")
                             PrettyPrint(
@@ -4379,7 +4379,7 @@ class CreatePatchFromActiveOperator(Operator):
             return {"CANCELLED"}
 
         if Global_TocManager.ActiveArchive.Name != "9ba626afa44a3aa3":
-            self.report({"WARNING"}, f"Patch Created Was Not From Base Archive")
+            self.report({"WARNING"}, "Patch Created Was Not From Base Archive")
 
         Global_TocManager.CreatePatchFromActive(self.patch_name)
 
@@ -4405,7 +4405,7 @@ class PatchArchiveOperator(Operator):
 
         SaveUnsavedEntries(self)
         Global_TocManager.PatchActiveArchive()
-        self.report({"INFO"}, f"Patch Written")
+        self.report({"INFO"}, "Patch Written")
         return {"FINISHED"}
 
 
@@ -4526,7 +4526,7 @@ class ArchiveEntryOperator(Operator):
                 Global_TocManager.SelectEntries([Entry], True)
             return {"FINISHED"}
         if event.shift:
-            if Global_TocManager.LastSelected != None:
+            if Global_TocManager.LastSelected is not None:
                 LastSelected = Global_TocManager.LastSelected
                 StartIndex = LastSelected.DEV_DrawIndex
                 EndIndex = Entry.DEV_DrawIndex
@@ -4604,7 +4604,7 @@ class MaterialShaderVariableColorEntryOperator(Operator):
     object_id: StringProperty()
     variable_index: bpy.props.IntProperty()
     color: bpy.props.FloatVectorProperty(
-        name=f"Color",
+        name="Color",
         subtype="COLOR",
         size=3,
         min=0.0,
@@ -4690,7 +4690,7 @@ class UndoArchiveEntryModOperator(Operator):
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
         for Entry in Entries:
-            if Entry != None:
+            if Entry is not None:
                 Entry.UndoModifiedData()
         return {"FINISHED"}
 
@@ -4769,7 +4769,7 @@ class RenamePatchEntryOperator(Operator):
             raise Exception(
                 "Entry does not exist in patch (cannot rename non patch entries)"
             )
-        if Entry != None and self.NewFileID != "":
+        if Entry is not None and self.NewFileID != "":
             Entry.FileID = int(self.NewFileID)
         return {"FINISHED"}
 
@@ -4792,7 +4792,7 @@ class DumpArchiveObjectOperator(Operator):
     def execute(self, context):
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
         for Entry in Entries:
-            if Entry != None:
+            if Entry is not None:
                 data = Entry.GetData()
                 FileName = str(Entry.FileID) + "." + GetTypeNameFromID(Entry.TypeID)
                 with open(self.directory + FileName, "w+b") as f:
@@ -4824,7 +4824,7 @@ class ImportDumpOperator(Operator, ImportHelper):
 
         Entries = EntriesFromStrings(self.object_id, self.object_typeid)
         for Entry in Entries:
-            if Entry != None:
+            if Entry is not None:
                 if not Entry.IsLoaded:
                     Entry.Load(False, False)
                 path = self.filepath
@@ -4916,7 +4916,7 @@ class SaveStingrayMeshOperator(Operator):
                         f"Archive for entry being saved is not loaded. Object: {object.name} ID: {ID}",
                     )
                     return {"CANCELLED"}
-                except:
+                except Exception:
                     self.report(
                         {"ERROR"},
                         f"Failed to find object with custom property ID. Object: {object.name}",
@@ -4946,7 +4946,7 @@ class BatchSaveStingrayMeshOperator(Operator):
                 ID = object["Z_ObjectID"]
                 if ID not in IDs:
                     IDs.append(ID)
-            except:
+            except Exception:
                 self.report({"ERROR"}, f"{object.name} has no HD2 custom properties")
                 return {"CANCELLED"}
         for ID in IDs:
@@ -4954,7 +4954,7 @@ class BatchSaveStingrayMeshOperator(Operator):
                 try:
                     if object["Z_ObjectID"] == ID:
                         object.select_set(True)
-                except:
+                except Exception:
                     pass
             wasSaved = Global_TocManager.Save(int(ID), MeshID)
             if not wasSaved:
@@ -4966,7 +4966,7 @@ class BatchSaveStingrayMeshOperator(Operator):
                                 f"Archive for entry being saved is not loaded. Object: {object.name}",
                             )
                             return {"CANCELLED"}
-                    except:
+                    except Exception:
                         PrettyPrint(f"Couldn't find Object: {object.name} at ID: {ID}")
                 self.report(
                     {"ERROR"},
@@ -4988,7 +4988,7 @@ def SaveMeshMaterials(objects):
                 PrettyPrint(f"Found material: {materialName} in {object.name}")
                 try:
                     material = bpy.data.materials[materialName]
-                except:
+                except Exception:
                     raise Exception(f"Could not find material: {materialName}")
                 if material not in materials:
                     materials.append(material)
@@ -4997,7 +4997,7 @@ def SaveMeshMaterials(objects):
     for material in materials:
         try:
             ID = int(material.name)
-        except:
+        except Exception:
             PrettyPrint(f"Failed to convert material: {material.name} to ID")
             continue
 
@@ -5055,14 +5055,14 @@ class SaveTextureFromBlendImageOperator(Operator):
             return {"CANCELLED"}
         Entries = EntriesFromString(self.object_id, TexID)
         for Entry in Entries:
-            if Entry != None:
+            if Entry is not None:
                 if not Entry.IsLoaded:
                     Entry.Load()
                 try:
                     BlendImageToStingrayTexture(
                         bpy.data.images[str(self.object_id)], Entry.LoadedData
                     )
-                except:
+                except Exception:
                     PrettyPrint(
                         "No blend texture was found for saving, using original", "warn"
                     )
@@ -5098,7 +5098,7 @@ class ExportTextureOperator(Operator, ExportHelper):
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
-        if Entry != None:
+        if Entry is not None:
             data = Entry.Load(False, False)
             with open(self.filepath, "w+b") as f:
                 f.write(Entry.LoadedData.ToDDS())
@@ -5130,7 +5130,7 @@ class ExportTexturePNGOperator(Operator, ExportHelper):
     def execute(self, context):
         Global_TocManager.Load(int(self.object_id), TexID)
         Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
-        if Entry != None:
+        if Entry is not None:
             tempdir = tempfile.gettempdir()
             for i in range(Entry.LoadedData.ArraySize):
                 filename = self.filepath.split(Global_backslash)[-1]
@@ -5186,7 +5186,7 @@ class BatchExportTextureOperator(Operator):
         EntriesIDs = IDsFromString(self.object_id)
         for EntryID in EntriesIDs:
             Entry = Global_TocManager.GetEntry(EntryID, TexID)
-            if Entry != None:
+            if Entry is not None:
                 data = Entry.Load(False, False)
                 with open(self.directory + str(Entry.FileID) + ".dds", "w+b") as f:
                     f.write(Entry.LoadedData.ToDDS())
@@ -5214,7 +5214,7 @@ class BatchExportTexturePNGOperator(Operator):
         for EntryID in EntriesIDs:
             Global_TocManager.Load(EntryID, TexID)
             Entry = Global_TocManager.GetEntry(EntryID, TexID)
-            if Entry != None:
+            if Entry is not None:
                 tempdir = tempfile.gettempdir()
                 dds_path = f"{tempdir}\\{EntryID}.dds"
                 with open(dds_path, "w+b") as f:
@@ -5260,7 +5260,7 @@ class SaveTextureFromDDSOperator(Operator, ImportHelper):
         if PatchesNotLoaded(self):
             return {"CANCELLED"}
         Entry = Global_TocManager.GetEntry(int(self.object_id), TexID)
-        if Entry != None:
+        if Entry is not None:
             if len(self.filepath) > 1:
                 # get texture data
                 Entry.Load()
@@ -5307,7 +5307,7 @@ class SaveTextureFromPNGOperator(Operator, ImportHelper):
 
 def SaveImagePNG(filepath, object_id):
     Entry = Global_TocManager.GetEntry(int(object_id), TexID)
-    if Entry != None:
+    if Entry is not None:
         if len(filepath) > 1:
             # get texture data
             Entry.Load()
@@ -5474,7 +5474,7 @@ class ShowMaterialEditorOperator(Operator):
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), MaterialID)
-        if Entry != None:
+        if Entry is not None:
             if not Entry.IsLoaded:
                 Entry.Load(False, False)
             mat = Entry.LoadedData
@@ -5498,7 +5498,7 @@ class SetMaterialTexture(Operator, ImportHelper):
 
     def execute(self, context):
         Entry = Global_TocManager.GetEntry(int(self.object_id), MaterialID)
-        if Entry != None:
+        if Entry is not None:
             if Entry.IsLoaded:
                 Entry.LoadedData.DEV_DDSPaths[self.tex_idx] = self.filepath
 
@@ -5881,7 +5881,7 @@ class CopyHexIDOperator(Operator):
             self.report({"ERROR"}, "No object is selected")
         try:
             ID = int(object["Z_ObjectID"])
-        except:
+        except Exception:
             self.report(
                 {"ERROR"}, f"Object: {object.name} has not Helldivers property ID"
             )
@@ -5889,7 +5889,7 @@ class CopyHexIDOperator(Operator):
 
         try:
             hexID = hex(ID)
-        except:
+        except Exception:
             self.report(
                 {"ERROR"}, f"Object: {object.name} ID: {ID} cannot be converted to hex"
             )
@@ -5911,7 +5911,7 @@ class CopyDecimalIDOperator(Operator):
             self.report({"ERROR"}, "No object is selected")
         try:
             ID = str(object["Z_ObjectID"])
-        except:
+        except Exception:
             self.report(
                 {"ERROR"}, f"Object: {object.name} has not Helldivers property ID"
             )
@@ -6078,10 +6078,10 @@ class HellDivers2ToolsPanel(Panel):
                     row = layout.row()
                     row.separator(factor=2.0)
                     ddsPath = mat.DEV_DDSPaths[i]
-                    if ddsPath != None:
+                    if ddsPath is not None:
                         filepath = Path(ddsPath)
-                    label = filepath.name if ddsPath != None else str(t)
-                    if Entry.MaterialTemplate != None:
+                    label = filepath.name if ddsPath is not None else str(t)
+                    if Entry.MaterialTemplate is not None:
                         label = (
                             TextureTypeLookup[Entry.MaterialTemplate][i] + ": " + label
                         )
@@ -6308,7 +6308,7 @@ class HellDivers2ToolsPanel(Panel):
         if scene.Hd2ToolPanelSettings.EnableTools:
             row.scale_x = 0.33
             ArchiveNum = "0/0"
-            if Global_TocManager.ActiveArchive != None:
+            if Global_TocManager.ActiveArchive is not None:
                 Archiveindex = (
                     Global_TocManager.LoadedArchives.index(
                         Global_TocManager.ActiveArchive
@@ -6350,12 +6350,12 @@ class HellDivers2ToolsPanel(Panel):
         row = layout.row()
         row = layout.row()
         title = "No Archive Loaded"
-        if Global_TocManager.ActiveArchive != None:
+        if Global_TocManager.ActiveArchive is not None:
             ArchiveID = Global_TocManager.ActiveArchive.Name
             name = GetArchiveNameFromID(ArchiveID)
             title = f"{name}    ID: {ArchiveID}"
         if (
-            Global_TocManager.ActivePatch != None
+            Global_TocManager.ActivePatch is not None
             and scene.Hd2ToolPanelSettings.PatchOnly
         ):
             name = Global_TocManager.ActivePatch.Name
@@ -6514,7 +6514,7 @@ class HellDivers2ToolsPanel(Panel):
                             ]
                             NewFriendlyNames.append(FriendlyName)
                             NewFriendlyIDs.append(Entry.FileID)
-                        except:
+                        except Exception:
                             FriendlyName = GetFriendlyNameFromID(Entry.FileID)
                             NewFriendlyNames.append(FriendlyName)
                             NewFriendlyIDs.append(Entry.FileID)
@@ -6526,7 +6526,7 @@ class HellDivers2ToolsPanel(Panel):
                     PatchEntry.DEV_DrawIndex = len(DrawChain)
 
                     previous_type_icon = type_icon
-                    if PatchEntry.MaterialTemplate != None:
+                    if PatchEntry.MaterialTemplate is not None:
                         type_icon = "NODE_MATERIAL"
 
                     row = col.row(align=True)
@@ -6758,7 +6758,7 @@ class WM_MT_button_context(Menu):
                 row.operator(
                     "helldiver2.material_set_template", icon="MATSHADERBALL"
                 ).entry_id = str(Entry.FileID)
-                if Entry.LoadedData != None:
+                if Entry.LoadedData is not None:
                     row.operator(
                         "helldiver2.copytest",
                         icon="COPY_ID",
